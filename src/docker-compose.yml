@@ -1,0 +1,38 @@
+﻿services:
+  postgres:
+    container_name: postgres
+    image: postgres
+    environment:
+      POSTGRES_USER: usuario_postgres
+      POSTGRES_PASSWORD: docker@123
+      POSTGRES_DB: exemplo
+  rabbitmq:
+    container_name: rabbitmq 
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: usuario_rabbitmq
+      RABBITMQ_DEFAULT_PASS: docker@123
+    ports:
+      - 8080:15672
+  redis:
+    container_name: redis
+    image: redis:alpine
+  api:
+    container_name: api
+    image: testes-microservico-docker
+    build:
+      context: .
+      dockerfile: testes-microservico-docker/Dockerfile
+    ports:
+      - 5000:80
+      - 5001:443
+    depends_on: 
+      - postgres
+      - rabbitmq
+      - redis
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=exemplo;Username=usuario_postgres;Password=docker@123"
+      Redis__ConnectionString: "localhost:6379,abortConnect=false"
+      RabbitMQ__Host: "localhost"
+      RabbitMQ__User: "usuario_rabbitmq"
+      RabbitMQ__Password: "docker@123"

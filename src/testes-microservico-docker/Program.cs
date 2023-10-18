@@ -13,15 +13,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddDbContext<ApplicationContext>(options =>
     {
-        var connectionStrings = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
-        if (connectionStrings == null) throw new ArgumentNullException("ConnectionStrings__DefaultConnection");
+        var connectionStrings = Environment.GetEnvironmentVariable("ConnectionStrings__Postgresql");
+        if (connectionStrings == null) throw new ArgumentNullException("ConnectionStrings__Postgresql");
         options.UseNpgsql(connectionStrings);
     });
 
 builder.Services
     .AddSingleton<IConnectionMultiplexer>(options =>
     {
-        var connectionString = Environment.GetEnvironmentVariable("Redis__ConnectionString");
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__Redis");
         var connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
         return connectionMultiplexer;
     });

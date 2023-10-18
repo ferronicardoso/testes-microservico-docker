@@ -6,33 +6,52 @@
       POSTGRES_USER: usuario_postgres
       POSTGRES_PASSWORD: docker@123
       POSTGRES_DB: exemplo
+    ports:
+      - 5432:5432
+    networks: 
+      - appnetwork
   rabbitmq:
-    container_name: rabbitmq 
+    container_name: rabbitmq
     image: rabbitmq:3-management
     environment:
-      RABBITMQ_DEFAULT_USER: usuario_rabbitmq
-      RABBITMQ_DEFAULT_PASS: docker@123
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     ports:
       - 8080:15672
+    networks:
+      - appnetwork
   redis:
     container_name: redis
     image: redis:alpine
+#    image: bitnami/redis:latest
+#    environment:
+#      - REDIS_REPLICATION_MODE=master
+#      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - 6379:6379
+    networks:
+      - appnetwork
   api:
     container_name: api
     image: testes-microservico-docker
     build:
       context: .
       dockerfile: testes-microservico-docker/Dockerfile
+    networks:
+      - appnetwork
     ports:
       - 5000:80
-      - 5001:443
+#      - 5001:443
     depends_on: 
       - postgres
       - rabbitmq
       - redis
     environment:
-      ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=exemplo;Username=usuario_postgres;Password=docker@123"
-      Redis__ConnectionString: "localhost:6379,abortConnect=false"
-      RabbitMQ__Host: "localhost"
-      RabbitMQ__User: "usuario_rabbitmq"
-      RabbitMQ__Password: "docker@123"
+      ConnectionStrings__Postgresql: "Host=postgres;Port=5432;Database=exemplo;Username=${POSTGRESQL_USERNAME};Password=${POSTGRESQL_PASSWORD}"
+      RabbitMQ__Host: "rabbitmq"
+      RabbitMQ__User: ${RABBITMQ_USERNAME}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+      ConnectionStrings__Redis: "redis:6379,abortConnect=false"
+networks:
+  appnetwork:
+    driver: bridge

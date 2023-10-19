@@ -3,9 +3,10 @@
     container_name: postgres
     image: postgres
     environment:
-      POSTGRES_USER: usuario_postgres
-      POSTGRES_PASSWORD: docker@123
+      POSTGRES_USER: ${POSTGRESQL_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRESQL_PASSWORD}
       POSTGRES_DB: exemplo
+      PGDATA: /data/postgres
     ports:
       - 5432:5432
     networks: 
@@ -20,13 +21,9 @@
       - 8080:15672
     networks:
       - appnetwork
-  redis:
-    container_name: redis
+  redis-master:
+    container_name: redis-master
     image: redis:alpine
-#    image: bitnami/redis:latest
-#    environment:
-#      - REDIS_REPLICATION_MODE=master
-#      - ALLOW_EMPTY_PASSWORD=yes
     ports:
       - 6379:6379
     networks:
@@ -41,17 +38,17 @@
       - appnetwork
     ports:
       - 5000:80
-#      - 5001:443
     depends_on: 
       - postgres
       - rabbitmq
-      - redis
+      - redis-master  
+    command: [ "dotnet", "ef", "database update" ]
     environment:
       ConnectionStrings__Postgresql: "Host=postgres;Port=5432;Database=exemplo;Username=${POSTGRESQL_USERNAME};Password=${POSTGRESQL_PASSWORD}"
       RabbitMQ__Host: "rabbitmq"
       RabbitMQ__User: ${RABBITMQ_USERNAME}
       RabbitMQ__Password: ${RABBITMQ_PASSWORD}
-      ConnectionStrings__Redis: "redis:6379,abortConnect=false"
+      ConnectionStrings__Redis: "redis-master:6379,abortConnect=false"
 networks:
   appnetwork:
     driver: bridge

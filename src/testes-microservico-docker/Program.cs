@@ -5,7 +5,6 @@ using TestesMicroservicoDocker;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -67,8 +66,12 @@ builder.Services
 var app = builder.Build();
 
 app.MapGet("/", () => "Hello World!");
+app.MapGet("/pessoas", ([FromServices] ApplicationContext context) =>
+{
+    var result = context.Pessoas.ToList();
+    return Results.Ok(result);
+});
 app.MapGet("/configs", (
-    [FromServices] ApplicationContext context,
     [FromServices] IConnectionMultiplexer redis
 ) =>
 {

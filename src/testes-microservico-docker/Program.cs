@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using TestesMicroservicoDocker;
@@ -12,7 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddDbContext<ApplicationContext>(options =>
     {
-        var connectionStrings = Environment.GetEnvironmentVariable("ConnectionStrings__Postgresql");
+        var connectionStrings = Environment.GetEnvironmentVariable("ConnectionStrings__Postgresql") ??
+                                builder.Configuration.GetConnectionString("Postgresql");
         if (connectionStrings == null) throw new ArgumentNullException("ConnectionStrings__Postgresql");
         options.UseNpgsql(connectionStrings);
     });
@@ -20,7 +20,8 @@ builder.Services
 builder.Services
     .AddSingleton<IConnectionMultiplexer>(options =>
     {
-        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__Redis");
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__Redis") ??
+                               builder.Configuration.GetConnectionString("Redis");
         var connectionMultiplexer = ConnectionMultiplexer.Connect(connectionString);
         return connectionMultiplexer;
     });

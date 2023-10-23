@@ -42,7 +42,6 @@
       - postgres
       - rabbitmq
       - redis-master  
-    command: [ "dotnet", "ef", "database update" ]
     environment:
       ConnectionStrings__Postgresql: "Host=postgres;Port=5432;Database=exemplo;Username=${POSTGRESQL_USERNAME};Password=${POSTGRESQL_PASSWORD}"
       RabbitMQ__Host: "rabbitmq"
